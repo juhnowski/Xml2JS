@@ -1,0 +1,19 @@
+<!DOCTYPE HTML><html><head><script type="text/javascript">
+         var db = openDatabase('mydb', '2.0', 'Test DB', 2 * 1024 * 1024);
+         var msg;
+         db.transaction(function (tx) {
+            tx.executeSql('CREATE TABLE IF NOT EXISTS DICT (key unique, val)');});
+            db.transaction(function (tx) {
+              tx.executeSql('INSERT INTO DICT (key, val) VALUES ("a", "<H1><h><key1>a</key1><key2>a</key2></h><body>.<s>a</s>¦ The first letter of the alphabet, and inherent short vowel.</body><tail><L>1</L><pc>001</pc></tail></H1>")');
+            });
+db.transaction(function (tx) {
+tx.executeSql('INSERT INTO DICT (key, val) VALUES ("a", "<H1><h><key1>a</key1><key2>a</key2></h><body>.<s>a</s>¦ ind.<br/>²1 No, not.<br/>²2 A privative, prohibitive, and diminutive particle.<br/>²3 An interjection of pity. It also implies degrees of difference, and similarity. As a negative prefix to words beginning with a vowel, <s>a</s> is changed to <s>an,</s> as <s>a</s> and <s>anta</s> form <s>ananta.</s></body><tail><L>2</L><pc>001</pc></tail></H1>")');});
+</script>
+
+</head>
+
+<body>
+<div id="status" name="status">Status Message</div>
+</body>
+
+</html>
