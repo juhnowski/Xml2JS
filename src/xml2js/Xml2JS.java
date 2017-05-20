@@ -23,8 +23,16 @@ public class Xml2JS {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-
-        File f = new File("wil.html");
+        if (args.length==0){
+            System.out.println("Usage: java -jar Xml2JS.jar <dict_name>.xml");
+        }
+        File argFileName = new File(args[0]);
+        String filenameWithExtension = argFileName.getName();
+        
+        String[] ar = filenameWithExtension.split("\\.");
+        String name = ar[0];
+        String tableName = name.toUpperCase();
+        File f = new File(name + ".html");
         try {
             f.createNewFile();
         } catch (IOException ex) {
@@ -32,9 +40,9 @@ public class Xml2JS {
         }
 
         try (
-                FileInputStream inputStream = new FileInputStream("wil.xml");
+                FileInputStream inputStream = new FileInputStream(name+".xml");
                 Scanner sc = new Scanner(inputStream, "UTF-8");
-                OutputStream fos = new FileOutputStream("wil.html");
+                OutputStream fos = new FileOutputStream(name + ".html");
                 OutputStreamWriter osr = new OutputStreamWriter(fos, Charset.forName("UTF-8"));
                 BufferedWriter bw = new BufferedWriter(osr);) {
             StringBuilder sb = new StringBuilder();
@@ -42,9 +50,9 @@ public class Xml2JS {
                     = "<!DOCTYPE HTML><html><head><script type=\"text/javascript\">\n"
                     + "         var db = openDatabase('mydb', '1.0', 'Test DB', 2 * 1024 * 1024);\n"
                     + "         var msg;\n"
-                    + "         db.transaction(function (tx) {tx.executeSql('DROP TABLE DICT');});"
+                    + "         db.transaction(function (tx) {tx.executeSql('DROP TABLE "+tableName+"');});"
                     + "         db.transaction(function (tx) {\n"
-                    + "            tx.executeSql('CREATE TABLE IF NOT EXISTS DICT (key unique, val)');});";
+                    + "            tx.executeSql('CREATE TABLE IF NOT EXISTS "+tableName+" (key unique, val)');});";
             sb.append(class_wrapper);
 
             int i = 0;
@@ -66,7 +74,7 @@ public class Xml2JS {
                         String body = s3.replaceAll("</s>", "</b>");
 
                         sb.append("db.transaction(function (tx) {\n");
-                        sb.append("tx.executeSql('INSERT INTO DICT (key, val) VALUES (\""+word+"\", \""+body+"\")');});");
+                        sb.append("tx.executeSql('INSERT INTO "+tableName+" (key, val) VALUES (\""+word+"\", \""+body+"\")');});");
                         bw.append(sb.toString());
                         bw.newLine();
                         bw.flush();
@@ -77,7 +85,7 @@ public class Xml2JS {
             }
             sb.append("\n"
                     + "         db.transaction(function (tx) {\n"
-                    + "            tx.executeSql('SELECT * FROM DICT', [], function (tx, results) {\n"
+                    + "            tx.executeSql('SELECT * FROM "+tableName+"', [], function (tx, results) {\n"
                     + "               var len = results.rows.length, i;\n"
                     + "               msg = \"<p>Found rows: \" + len + \"</p>\";\n"
                     + "               document.querySelector('#status').innerHTML +=  msg;\n"
@@ -105,7 +113,7 @@ public class Xml2JS {
 
         } catch (IOException ex) {
             System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            System.out.println("Please check that wil.xml exist");
+            System.out.println("Please check that "+name+".xml exist");
             System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             Logger.getLogger(Xml2JS.class.getName()).log(Level.SEVERE, null, ex);
         }
