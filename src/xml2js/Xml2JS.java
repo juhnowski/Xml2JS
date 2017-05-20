@@ -26,6 +26,9 @@ public class Xml2JS {
         if (args.length==0){
             System.out.println("Usage: java -jar Xml2JS.jar <dict_name>.xml");
         }
+        boolean isBodySplitterCheck = true;
+        String bodySplitter = "";
+        
         File argFileName = new File(args[0]);
         String filenameWithExtension = argFileName.getName();
         
@@ -67,12 +70,32 @@ public class Xml2JS {
                     
                     String word = warray[1].replaceAll("'", "&acute;");;
                     if (word.length() > 0) {
-                        String[] s0 = line.split("<body>.");
-                        String[] s1 = s0[1].split("</body>");
-                        String s2 = s1[0].replaceAll("'", "&acute;");
-                        String s3 = s2.replaceAll("<s>", "<b>");
-                        String body = s3.replaceAll("</s>", "</b>");
-
+                        /**
+                         * Following fixed ap90.xml where splitter is just <body>
+                         */
+                        if (isBodySplitterCheck){
+                            if (line.contains("<body>.")) {
+                                bodySplitter = "<body>.";
+                            } else {
+                                bodySplitter = "<body";
+                            }
+                        }
+                        String s2 = "";
+                        try {
+                            String[] s0 = line.split(bodySplitter);
+                            
+                            if(bodySplitter == "<body") {
+                                String tmp = s0[1].substring(s0[1].indexOf(">")+1);
+                                s0[1] = tmp;
+                            }
+                            String[] s1 = s0[1].split("</body>");
+                            s2 = s1[0].replaceAll("'", "&acute;");
+                        } catch (ArrayIndexOutOfBoundsException e){
+                            System.out.println("line with error: " + line + "\n");
+                        }        
+                            String s3 = s2.replaceAll("<s>", "<b>");
+                            String body = s3.replaceAll("</s>", "</b>");
+                
                         sb.append("db.transaction(function (tx) {\n");
                         sb.append("tx.executeSql('INSERT INTO "+tableName+" (key, val) VALUES (\""+word+"\", \""+body+"\")');});");
                         bw.append(sb.toString());
