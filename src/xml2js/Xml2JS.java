@@ -29,6 +29,10 @@ public class Xml2JS {
         boolean isBodySplitterCheck = true;
         String bodySplitter = "";
         
+        boolean isHeaderSplitterCheck = true;
+        String headerEndSplitter = "";
+        String headerBeginSplitter = "";
+        
         File argFileName = new File(args[0]);
         String filenameWithExtension = argFileName.getName();
         
@@ -65,8 +69,25 @@ public class Xml2JS {
 
                 if (line.contains("<H1>")) {
                     i++;
-                    String[] sarray = line.split("</key2></h><body>");
-                    String[] warray = sarray[0].split("</key1><key2>");
+                    
+                    /**
+                     * Following fixed monier.xml and mw.xml format
+                     */
+                    if (isHeaderSplitterCheck) {
+                        isHeaderSplitterCheck = false;
+                        
+                        if (line.contains("</key2></h><body>")) {
+                            headerEndSplitter = "</key2></h><body>";
+                            headerBeginSplitter = "</key1><key2>";
+                        } else {
+                            headerEndSplitter = "</key1><hc1>";
+                            headerBeginSplitter = "</hc3><key1>";
+                        }
+                    }
+                    
+                    String[] sarray = line.split(headerEndSplitter);
+                    String[] warray = sarray[0].split(headerBeginSplitter);
+                    
                     
                     String word = warray[1].replaceAll("'", "&acute;");;
                     if (word.length() > 0) {
@@ -74,6 +95,7 @@ public class Xml2JS {
                          * Following fixed ap90.xml where splitter is just <body>
                          */
                         if (isBodySplitterCheck){
+                            isBodySplitterCheck = false;
                             if (line.contains("<body>.")) {
                                 bodySplitter = "<body>.";
                             } else {
